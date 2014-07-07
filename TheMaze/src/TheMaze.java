@@ -1,4 +1,5 @@
 import java.awt.Color;
+import java.awt.Font;
 import java.awt.event.KeyEvent;
 
 import acm.program.GraphicsProgram;
@@ -6,6 +7,8 @@ import acm.graphics.GLabel;
 import acm.graphics.GRect;
 import acm.util.RandomGenerator;
 public class TheMaze extends GraphicsProgram {
+	private static final long serialVersionUID = 1L;
+
 	public static final int APPLICATION_WIDTH = 600;
 	
 	public static final int APPLICATION_HEIGHT = 600;
@@ -14,12 +17,9 @@ public class TheMaze extends GraphicsProgram {
 	
 	public static final int NUMBER_OF_ROWS = 10;
 	
-	public static final double BLOCK_WIDTH = APPLICATION_WIDTH / BLOCKS_PER_ROW;
+	public static final double BLOCK_WIDTH = 60;
 	
-	public static final double BLOCK_HEIGHT = APPLICATION_HEIGHT / NUMBER_OF_ROWS;
-	
-	private int lastKeyEvent;
-	 
+	public static final double BLOCK_HEIGHT = 60;
 	
 	private RandomGenerator rgen = RandomGenerator.getInstance();
 	
@@ -28,14 +28,26 @@ public class TheMaze extends GraphicsProgram {
 	private double xLocation = 0 ;
 	
 	private double yLocation = 0;
-	private double type;
+	
+	private int Moves = 0;
+	
+	String Score = Moves + " Moves";
+	
+	private GLabel label;
+	
+	private GLabel label1;
+	
+	private GLabel label2;
+	
 	
 	/*when i learn how to do 2D arrays i can replace*/
 	/*Just testing git */
 	String Path = "9,9 : 9,8 : 9,7 : 8,7 : 7,7 : 6,7 : 5,7 : 4,7 : 4,6 : 4,5 : 4,4 : 5,4 : 6,4 : 7,4 : 7,3 : 7,2 : 6,2 : 5,2 : 5,1 : 5,0 ";
 	String Path1 = "9,9 : 9,8 : 9,7 : 8,7 : 7,7 : 6,7 : 6,8  : 5,8 : 4,8 : 4,7 : 4,6 : 4,5 : 5,5 : 6,5 : 7,5 : 7,4 : 7,3 : 7,2 : 6,2 : 5,2 : 4,2 : 3,2 : 3,3 : 2,3 : 1,3 : 1,2 : 1,1 : 1,0";
 	String CurrPath;
-	private double PathCh = Math.random();
+
+	private GLabel score;
+	
 	public static void main(String[]args){
 		
 		new TheMaze().start();
@@ -46,12 +58,20 @@ public class TheMaze extends GraphicsProgram {
 		setup();
 		addKeyListeners();
 		addMouseListeners();
-		GLabel label = new GLabel("Try to guess the path to the top.", 25,255);
-		GLabel label1 = new GLabel("A wrong Path will take you back to start",25,280);
-		GLabel label2 = new GLabel ("Use the arrow keys to navigate the black box",25,335);
+		Font newFont = new Font("Verdana", Font.BOLD, 20);
+		
+		label = new GLabel("Try to guess the path to the top.", 25,255);
+		label1 = new GLabel("A wrong Path will take you back to start",25,280);
+		label2 = new GLabel ("Use the arrow keys to navigate the black box",25,335);
+		
+		label.setFont(newFont);
+		label1.setFont(newFont);
+		label2.setFont(newFont);
 		add(label);
 		add(label1);
 		add(label2);
+		
+	
 		
 		if (rgen.nextInt(2,3) == 2){
 			CurrPath = Path1;
@@ -64,6 +84,7 @@ public class TheMaze extends GraphicsProgram {
 	public void setup() {
 		blocks();
 		lostBox();
+		score();
 	}
 	public void blocks(){
 		for(int i = 0; i < BLOCKS_PER_ROW ; i ++) {
@@ -97,7 +118,42 @@ public class TheMaze extends GraphicsProgram {
 	
 	
 	
+	public void score (){
+		
+		Font scoreFont = new Font("Verdana", Font.BOLD, 30);
+		score = new GLabel (Score,10,BLOCK_HEIGHT* 10);
+		score.setFont(scoreFont);
+		add(score);
+	}
+	
+	public void finale (){
+		Font finalFont = new Font ("Verdana", Font.BOLD, 80);
+		GLabel finale = new GLabel("Final Score : " ,30,300);
+		GLabel finalScore = new GLabel (Moves + " Moves", 60,360);
+		finalScore.setFont(finalFont);
+		finale.setFont(finalFont);
+		finalScore.sendToFront();
+		finale.sendToFront();
+		add(finale);
+		add(finalScore);
+		
+	}
+	
 	public void keyPressed(KeyEvent ke){
+		Moves = Moves + 1;
+		
+		score.setLabel(Moves + " Moves");
+		
+		remove(label);
+		remove(label1);
+		remove(label2);
+		
+		if(yLocation < BLOCK_HEIGHT){
+			remove(score);
+			finale();
+				
+			
+		}
 		if (ke.getKeyCode() == KeyEvent.VK_UP){
 			
 				Cube.setY(yLocation - BLOCK_WIDTH);
@@ -106,7 +162,6 @@ public class TheMaze extends GraphicsProgram {
 
 			
 			lostCube.setLocation(xLocation,yLocation);
-			lastKeyEvent = KeyEvent.VK_UP;
 			if(CurrPath.indexOf(getCurrLoc())>0){
 				GRect RPath = new GRect(xLocation ,yLocation,BLOCK_WIDTH - 4,BLOCK_HEIGHT - 4);
 				RPath.setFilled(true);
@@ -135,7 +190,6 @@ public class TheMaze extends GraphicsProgram {
 			lostCube.setLocation(xLocation,yLocation);
 			
 		    
-		    lastKeyEvent = KeyEvent.VK_DOWN;
 		    if(CurrPath.indexOf(getCurrLoc())>0){
 				GRect RPath = new GRect(xLocation ,yLocation,BLOCK_WIDTH - 4,BLOCK_HEIGHT - 4);
 				RPath.setFilled(true);
@@ -171,7 +225,6 @@ public class TheMaze extends GraphicsProgram {
 				
 				
 			
-			lastKeyEvent = KeyEvent.VK_LEFT;
 			if(CurrPath.indexOf(getCurrLoc())>0){
 				GRect RPath = new GRect(xLocation ,yLocation,BLOCK_WIDTH - 4,BLOCK_HEIGHT - 4);
 				RPath.setFilled(true);
@@ -202,7 +255,6 @@ public class TheMaze extends GraphicsProgram {
 				lostCube.setLocation(xLocation,yLocation);
 			
 				
-				lastKeyEvent = KeyEvent.VK_RIGHT;
 				if(CurrPath.indexOf(getCurrLoc())>0){
 					GRect RPath = new GRect(xLocation ,yLocation,BLOCK_WIDTH - 4,BLOCK_HEIGHT - 4);
 					RPath.setFilled(true);
